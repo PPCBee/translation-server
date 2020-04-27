@@ -9,13 +9,16 @@ module API
 
       def index
         etag = TranslationCache.index_etag(current_project)
+        puts "ETAG: #{etag}"
         return unless stale? etag: etag
         cache_key = "#{current_project.id}-#{params[:format]}"
 
         if translation_cache = TranslationCache.find_cache(kind: cache_key, etag: etag)
+          puts "GETTING FROM CACHE #{etag}"
           response.headers['CustomCache'] = etag.to_json
           render status: 200, text: translation_cache.cache
         else
+          puts "GENERATING #{etag}"
           @output = Translation.dump_hash current_project.translations.include_dependencies
 
           TranslationCache.cache(kind: cache_key, etag: etag, cache: dump_cache(@output))

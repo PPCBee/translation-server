@@ -76,6 +76,7 @@ class TranslationsController < BaseProjectController
       etag: TranslationCache.index_etag(current_project),
       cache: YAML.dump(Translation.dump_hash current_project.translations.include_dependencies).html_safe
     )
+    puts "CACHING UPDATE: #{TranslationCache.index_etag(current_project)}"
   end
 
   # Only allow a trusted parameter "white list" through.
