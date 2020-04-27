@@ -36,7 +36,7 @@ class TranslationsController < BaseProjectController
   # PATCH/PUT /translations/1
   def update
     @translation.update(translation_params)
-
+    @project = @translation.project
     if request.xhr?
       head :ok
     else
