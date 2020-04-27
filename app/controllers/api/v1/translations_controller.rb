@@ -3,21 +3,22 @@ module API
     class TranslationsController < ApiController
 
       def index_head
-        stale? etag: index_etag
+        stale? etag: TranslationCache.index_etag(current_project)
         head :ok
       end
 
       def index
-        return unless stale? etag: index_etag
+        etag = TranslationCache.index_etag(current_project)
+        return unless stale? etag: etag
         cache_key = "#{current_project.id}-#{params[:format]}"
 
-        if translation_cache = TranslationCache.find_cache(kind: cache_key, etag: index_etag)
-          response.headers['CustomCache'] = index_etag.to_json
+        if translation_cache = TranslationCache.find_cache(kind: cache_key, etag: etag)
+          response.headers['CustomCache'] = etag.to_json
           render status: 200, text: translation_cache.cache
         else
           @output = Translation.dump_hash current_project.translations.include_dependencies
 
-          TranslationCache.cache(kind: cache_key, etag: index_etag, cache: dump_cache(@output))
+          TranslationCache.cache(kind: cache_key, etag: etag, cache: dump_cache(@output))
 
           respond_with @output
         end
@@ -85,12 +86,6 @@ module API
         when 'yaml' then YAML.dump(output).html_safe
         else output.to_json
         end
-      end
-
-      def index_etag
-        translation = current_project.translations.unscope(:order).order(:updated_at).last
-        updated_at = translation ? translation.updated_at : ''
-        [updated_at]
       end
 
       def translation_params(data)

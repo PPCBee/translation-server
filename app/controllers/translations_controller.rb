@@ -1,5 +1,6 @@
 class TranslationsController < BaseProjectController
   before_action :set_translation, only: [:show, :edit, :update, :destroy]
+  after_action :cache_translations, only: [:update, :create]
 
   # GET /translations
   def index
@@ -67,6 +68,14 @@ class TranslationsController < BaseProjectController
   # Only allow a trusted parameter "white list" through.
   def new_translation_params
     params.permit(:key_id, :locale_id)
+  end
+
+  def cache_translations
+    TranslationCache.cache(
+      kind: "#{current_project.id}-yaml",
+      etag: TranslationCache.index_etag(current_project),
+      cache: YAML.dump(Translation.dump_hash current_project.translations.include_dependencies).html_safe
+    )
   end
 
   # Only allow a trusted parameter "white list" through.

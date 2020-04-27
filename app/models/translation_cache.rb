@@ -14,6 +14,12 @@ class TranslationCache < ActiveRecord::Base
     end
   end
 
+  def self.index_etag(project)
+    translation = project.translations.unscope(:order).order(:updated_at).last
+    updated_at = translation ? translation.updated_at : ''
+    [updated_at]
+  end
+
   def self.build_etag(etag)
     Digest::MD5.hexdigest(etag.to_json)
   end
