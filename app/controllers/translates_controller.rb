@@ -9,9 +9,9 @@ class TranslatesController < BaseProjectController
       @edited_filter = @search.edited_filter
       @keys   = @search.resolve.preload(:translations, highlights: {image: :location})
 
-      @hierarchy = current_project.keys.hierarchy(@search.resolve)
+      # @hierarchy = current_project.keys.hierarchy(@search.resolve)
 
-      @locations = current_project.screenshots? ? current_project.locations.alphabetical : []
+      # @locations = current_project.screenshots? ? current_project.locations.alphabetical : []
 
       if key_path
         @keys = @keys.with_key_path(key_path.gsub('/', '.'))
