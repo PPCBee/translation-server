@@ -3,25 +3,28 @@ module API
     class TranslationsController < ApiController
 
       def index_head
-        stale? etag: TranslationCache.index_etag(current_project)
+        stale? etag: TranslationCache.find_latest(kind: "#{current_project.id}-#{params[:format]}").try(:etag)
         head :ok
       end
 
       def index
-        etag = TranslationCache.index_etag(current_project)
-        puts "ETAG: #{etag}"
-        return unless stale? etag: etag
         cache_key = "#{current_project.id}-#{params[:format]}"
+        if translation_cache = TranslationCache.find_latest(kind: cache_key)
+          puts "LATEST CACHE #{translation_cache.etag}"
+          return unless stale? etag: translation_cache.etag
 
-        if translation_cache = TranslationCache.find_cache(kind: cache_key, etag: etag)
-          puts "GETTING FROM CACHE #{etag}"
-          response.headers['CustomCache'] = etag.to_json
+          response.headers['CustomCache'] = translation_cache.etag
+
           render status: 200, text: translation_cache.cache
         else
+          etag = TranslationCache.index_etag(current_project)
           puts "GENERATING #{etag}"
           @output = Translation.dump_hash current_project.translations.include_dependencies
 
           TranslationCache.cache(kind: cache_key, etag: etag, cache: dump_cache(@output))
+
+          return unless stale? etag: etag
+          puts "GENERATED #{etag}"
 
           respond_with @output
         end

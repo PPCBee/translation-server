@@ -2,6 +2,10 @@ require 'digest'
 
 class TranslationCache < ActiveRecord::Base
 
+  def self.find_latest(kind:)
+    where(kind: kind).first
+  end
+
   def self.find_cache(kind:, etag:)
     find_by(kind: kind, etag: build_etag(etag))
   end
