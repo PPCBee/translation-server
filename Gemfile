@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-ruby '2.2.0'
+ruby '2.5.5'
 
 gem 'active_model_serializers'
 gem 'airbrake'
@@ -42,7 +42,6 @@ group :development do
   gem 'capistrano-rails'
   gem 'capistrano-rbenv'
   gem 'guard-rspec'
-  gem 'mailcatcher'
   gem 'pry-rails'
   gem 'spring'
 end
