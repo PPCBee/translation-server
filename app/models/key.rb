@@ -16,7 +16,7 @@ class Key < ActiveRecord::Base
 
   validates :key, uniqueness: { scope: :project_id },
                   length: { minimum: 1 },
-                  format: { with: /\A[^\.][a-zA-Z0-9\.\-_\/]+[^\.]\z/ }
+                  format: { with: /\A[^\.][a-zA-Z0-9\.\-_\/\s]+[^\.]\z/ }
   validates :key, format: { without: /\.\./ }
 
   validate :validate_key_scopes
